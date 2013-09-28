@@ -68,7 +68,7 @@ if($ch) {
 	if($headers['http_code'] == 200) { 
       
 		$dom = new DOMDocument();  
-		$dom->loadHTML($content);  
+		@$dom->loadHTML($content);  
 		$tempDom = new DOMDocument();  
               
 		$xpath = new DOMXPath($dom); 
