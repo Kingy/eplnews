@@ -2,50 +2,13 @@
 
 require 'src/facebook.php';
 require 'config.php';
+require 'functions.php';
 
 $db = new mysqli($conf['db_hostname'], $conf['db_username'], $conf['db_password'], $conf['db_name']);
 $URL = "http://www.premierleague.com/en-gb/matchday/results.html?paramClubId=ALL&paramComp_8=true&paramSeason=2013-2014&view=.dateSeason";
 
 if($db->connect_errno > 0){
     die('Unable to connect to database [' . $db->connect_error . ']');
-}
-
-function addToFacebook($home, $away, $score, $location) {
-
-	global $conf;
-	
-	$PAGE_TOKEN = "";
-
-	$facebook = new Facebook(array(  
-  		'appId'  => $conf['facebook_app_id'], 
-  		'secret' => $conf['facebook_secret'],  
-  		'cookie' => true,  
-	));  
-  
-	$post = array('access_token' => $conf['access_token']); 
-  
-	try {
-		$res = $facebook->api('/me/accounts','GET',$post);
-	
-		if (isset($res['data'])) {
-        	foreach ($res['data'] as $account) {
-        		if ($conf['page_id'] == $account['id']) {
-           			$PAGE_TOKEN = $account['access_token'];
-           			break;
-        		}
-        	}
-    	}	
-	} catch (Exception $e) {
-		echo $e->getMessage();
-	}
-
-	$post = array('access_token' => $PAGE_TOKEN, 'message' => "Final Result: $home $score $away @ $location");  
-  
-	try {  
-		$res = $facebook->api("/EPLNewsInfo/feed","POST",$post); 		  
-	} catch (Exception $e){  
-		echo $e->getMessage();  
-	}  
 }
 
 $ch = curl_init();
@@ -133,6 +96,74 @@ if($ch) {
 			if ($conf['debug'] == 1) {
 				echo "Adding " . $result['home'] . " vs " . $result['away'] . " to database.<br /><br />"; 
 			}
+			
+			$now = date('Y-m-d H:i:s');
+			$title = $result['home'] . " vs " . $result['away'];
+			$post_name = strtolower(str_replace("-", " ", $title));
+				
+			if ($stmt = $db->prepare("INSERT INTO wp_posts (post_author, post_date, post_date_gmt, post_content, post_title, post_excerpt, post_status, comment_status, ping_status, post_password, post_name, to_ping, pinged, post_modified, post_modified_gmt, post_content_filtered, post_parent, guid, menu_order, post_type, post_mime_type, comment_count) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")) {
+				$stmt->bind_param("isssssssssssssssisissi", $author = 1, $now, $now, $content = '', $title, $excerpt = '', $status = 'publish', $comment_status = 'closed', $ping_status = 'closed', $post_password = '', $post_name, $to_ping = '', $pinged = '', $now, $now, $post_content_filtered = '', $parent = 0, $guid = '', $menu_order = 0, $post_type = 'scoreboard', $post_mime_type = '', $comment_count = 0);
+				$stmt->execute();
+				$stmt->close();	      
+			}
+				
+			$lastRecord = $db->insert_id;		
+			
+			$timestamp = strtotime("now");
+			$edit_lock = $timestamp . ":1";
+			$edit_last = "1";
+			
+			if ($stmt = $db->prepare("INSERT INTO wp_postmeta (post_id, meta_key, meta_value) VALUES(?,?,?)")) {
+				$stmt->bind_param("iss", $lastRecord, $meta_key = '_edit_lock', $edit_lock);
+				$stmt->execute();
+				$stmt->close();	      
+			}
+			if ($stmt = $db->prepare("INSERT INTO wp_postmeta (post_id, meta_key, meta_value) VALUES(?,?,?)")) {
+				$stmt->bind_param("iss", $lastRecord, $meta_key = '_edit_last', $edit_last);
+				$stmt->execute();
+				$stmt->close();	      
+			}
+			
+			$gd_status = "Final";
+			
+			if ($stmt = $db->prepare("INSERT INTO wp_postmeta (post_id, meta_key, meta_value) VALUES(?,?,?)")) {
+				$stmt->bind_param("iss", $lastRecord, $meta_key = 'gd_status', $gd_status);
+				$stmt->execute();
+				$stmt->close();	      
+			}
+			
+			if ($stmt = $db->prepare("INSERT INTO wp_postmeta (post_id, meta_key, meta_value) VALUES(?,?,?)")) {
+				$stmt->bind_param("iss", $lastRecord, $meta_key = 'gd_away_team', team_name_to_short_name($result['home']));
+				$stmt->execute();
+				$stmt->close();	      
+			}
+			
+			if ($stmt = $db->prepare("INSERT INTO wp_postmeta (post_id, meta_key, meta_value) VALUES(?,?,?)")) {
+				$stmt->bind_param("iss", $lastRecord, $meta_key = 'gd_home_team', team_name_to_short_name($result['away']));
+				$stmt->execute();
+				$stmt->close();	      
+			}
+			
+			$rawScores = explode(" - ", $result['score']);
+			
+			if ($stmt = $db->prepare("INSERT INTO wp_postmeta (post_id, meta_key, meta_value) VALUES(?,?,?)")) {
+				$stmt->bind_param("iss", $lastRecord, $meta_key = 'gd_away_team_score', $rawScore[0]);
+				$stmt->execute();
+				$stmt->close();	      
+			}
+			
+			if ($stmt = $db->prepare("INSERT INTO wp_postmeta (post_id, meta_key, meta_value) VALUES(?,?,?)")) {
+				$stmt->bind_param("iss", $lastRecord, $meta_key = 'gd_home_team_score', $rawScore[1]);
+				$stmt->execute();
+				$stmt->close();	      
+			}
+			
+			if ($stmt = $db->prepare("INSERT INTO wp_term_relationships (object_id, term_taxonomy_id, term_order) VALUES(?,?,?)")) {
+				$stmt->bind_param("iii", $lastRecord, $term_id = 3, $order = 0);
+				$stmt->execute();
+				$stmt->close();	      
+			}
+			
 			if ($stmt = $db->prepare("INSERT INTO matches (matchDate, matchHome, matchAway, matchScore, matchLocation) VALUES(?,?,?,?,?)")) {
 				$stmt->bind_param("sssss", $result['date'], $result['home'], $result['away'], $result['score'], $result['location']);
 				$stmt->execute();

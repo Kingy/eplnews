@@ -2,39 +2,13 @@
 
 require 'src/facebook.php';
 require 'config.php';
+require 'functions.php';
 
 $db = new mysqli($conf['db_hostname'], $conf['db_username'], $conf['db_password'], $conf['db_name']);
 $URL = "http://www.premierleague.com/en-gb/matchday/matches.html?paramClubId=ALL&paramComp_8=true&view=.dateSeason";
 
 if($db->connect_errno > 0){
 	die('Unable to connect to database [' . $db->connect_error . ']');
-}
-
-function team_name_to_short_name($team) {
-	$shortname = '';
-	
-	if( $team == 'Arsenal' ) $shortname = 'ARS';
-	if( $team == 'Aston Villa' ) $shortname = 'AVL';
-	if( $team == 'Cardiff' ) $shortname = 'CAR';
-	if( $team == 'Chelsea' ) $shortname = 'CHE';
-	if( $team == 'Crystal Palace' ) $shortname = 'CRY';
-	if( $team == 'Everton' ) $shortname = 'EVE';
-	if( $team == 'Fulham' ) $shortname = 'FUL';
-	if( $team == 'Hull' ) $shortname = 'HUL';
-	if( $team == 'Liverpool' ) $shortname = 'LIV';
-	if( $team == 'Man City' ) $shortname = 'MCI';
-	if( $team == 'Man Utd' ) $shortname = 'MUN';
-	if( $team == 'Newcastle' ) $shortname = 'NEW';
-	if( $team == 'Norwich' ) $shortname = 'NOR';
-	if( $team == 'Southampton' ) $shortname = 'SOU';
-	if( $team == 'Stoke' ) $shortname = 'STK';
-	if( $team == 'Sunderland' ) $shortname = 'SUN';
-	if( $team == 'Swansea' ) $shortname = 'SWA';
-	if( $team == 'Tottenham' ) $shortname = 'TOT';
-	if( $team == 'West Brom' ) $shortname = 'WBA';
-	if( $team == 'West Ham' ) $shortname = 'WHU';
-	
-	return $shortname;
 }
 
 $ch = curl_init();
