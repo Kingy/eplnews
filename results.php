@@ -147,13 +147,13 @@ if($ch) {
 			$rawScores = explode(" - ", $result['score']);
 			
 			if ($stmt = $db->prepare("INSERT INTO wp_postmeta (post_id, meta_key, meta_value) VALUES(?,?,?)")) {
-				$stmt->bind_param("iss", $lastRecord, $meta_key = 'gd_away_team_score', $rawScore[0]);
+				$stmt->bind_param("iss", $lastRecord, $meta_key = 'gd_away_team_score', $rawScores[0]);
 				$stmt->execute();
 				$stmt->close();	      
 			}
 			
 			if ($stmt = $db->prepare("INSERT INTO wp_postmeta (post_id, meta_key, meta_value) VALUES(?,?,?)")) {
-				$stmt->bind_param("iss", $lastRecord, $meta_key = 'gd_home_team_score', $rawScore[1]);
+				$stmt->bind_param("iss", $lastRecord, $meta_key = 'gd_home_team_score', $rawScores[1]);
 				$stmt->execute();
 				$stmt->close();	      
 			}
