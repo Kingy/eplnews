@@ -74,18 +74,20 @@ if($ch){
            	
                 $rawTeams = explode(" v ", $teams);
 
-				if ($fixture->num_rows == 0) {
-					if ($teams != "") {
-                        $tsDate = strtotime($date);
-                        if ($tsDate <= $nextWeek) {
-							$fixtures[] = array(  
-									'date' => $date,  
-                   		            'time' => $time,  
-                    		        'home' => $rawTeams[0],
-                                    'away' => $rawTeams[1], 
-                    		        'location' => $location,            
-                    	    );
-                        }
+				if ($teams != "") {
+                    $tsDate = strtotime($date);
+                    if ($tsDate <= $nextWeek) {
+						if ($conf['debug'] == 1) {
+							echo "Found new fixture: " . $rawTeams[0] . " vs " . $rawTeams[1] . "<br /><br />"; 
+						}
+						$fixtures[] = array(  
+								'date' => $date,  
+                   		        'time' => $time,  
+                    		    'home' => $rawTeams[0],
+                                'away' => $rawTeams[1], 
+                    		    'location' => $location,            
+                    	);
+                        
                     }			          	      	 
 				}
 			}
@@ -96,9 +98,6 @@ if($ch){
 			
 							
 		}    
-	echo "<pre>";
-    print_r($fixtures);
-    echo "</pre>";
 	}
 }
 
