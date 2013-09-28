@@ -10,6 +10,33 @@ if($db->connect_errno > 0){
 	die('Unable to connect to database [' . $db->connect_error . ']');
 }
 
+function team_name_to_short_name($team) {
+	$shortname = '';
+	
+	if( $team == 'Arsenal' ) $shortname = 'ARS';
+	if( $team == 'Aston Villa' ) $shortname = 'AVL';
+	if( $team == 'Cardiff' ) $shortname = 'CAR';
+	if( $team == 'Chelsea' ) $shortname = 'CHE';
+	if( $team == 'Crystal Palace' ) $shortname = 'CRY';
+	if( $team == 'Everton' ) $shortname = 'EVE';
+	if( $team == 'Fulham' ) $shortname = 'FUL';
+	if( $team == 'Hull' ) $shortname = 'HUL';
+	if( $team == 'Liverpool' ) $shortname = 'LIV';
+	if( $team == 'Man City' ) $shortname = 'MCI';
+	if( $team == 'Man Utd' ) $shortname = 'MUN';
+	if( $team == 'Newcastle' ) $shortname = 'NEW';
+	if( $team == 'Norwich' ) $shortname = 'NOR';
+	if( $team == 'Southampton' ) $shortname = 'SOU';
+	if( $team == 'Stoke' ) $shortname = 'STK';
+	if( $team == 'Sunderland' ) $shortname = 'SUN';
+	if( $team == 'Swansea' ) $shortname = 'SWA';
+	if( $team == 'Tottenham' ) $shortname = 'TOT';
+	if( $team == 'West Brom' ) $shortname = 'WBA';
+	if( $team == 'West Ham' ) $shortname = 'WHU';
+	
+	return $shortname;
+}
+
 $ch = curl_init();
 if($ch){
 	curl_setopt($ch, CURLOPT_URL, $URL);
@@ -122,13 +149,13 @@ if($ch){
 							}
 							
 							if ($stmt = $db->prepare("INSERT INTO wp_postmeta (post_id, meta_key, meta_value) VALUES(?,?,?)")) {
-								$stmt->bind_param("iss", $lastRecord, $meta_key = 'gd_away_team', $rawTeams[0]);
+								$stmt->bind_param("iss", $lastRecord, $meta_key = 'gd_away_team', team_name_to_short_name($rawTeams[0]));
 								$stmt->execute();
 								$stmt->close();	      
 							}
 							
 							if ($stmt = $db->prepare("INSERT INTO wp_postmeta (post_id, meta_key, meta_value) VALUES(?,?,?)")) {
-								$stmt->bind_param("iss", $lastRecord, $meta_key = 'gd_home_team', $rawTeams[1]);
+								$stmt->bind_param("iss", $lastRecord, $meta_key = 'gd_home_team', team_name_to_short_name($rawTeams[1]));
 								$stmt->execute();
 								$stmt->close();	      
 							}
@@ -157,9 +184,8 @@ if($ch){
 									'home' => $rawTeams[0],
 									'away' => $rawTeams[1], 
 									'location' => $location,            
-							);
-							
-						sleep(1);
+							);							
+							sleep(1);
 						}							
 					}					
 				}				
