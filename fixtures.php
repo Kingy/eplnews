@@ -80,6 +80,19 @@ if($ch){
 						if ($conf['debug'] == 1) {
 							echo "Found new fixture: " . $rawTeams[0] . " vs " . $rawTeams[1] . "<br /><br />"; 
 						}
+						
+						$now = date('Y-m-d H:i:s');
+						$title = $rawTeams[0] . " vs " . $rawTeams[1];
+						$post_name = strtolower(str_replace("-", " ", $title));
+							
+						if ($stmt = $db->prepare("INSERT INTO wp_posts (post_author, post_date, post_date_gmt, post_content, post_title, post_excerpt, post_status, comment_status, ping_status, post_password, post_name, to_ping, pinged, post_modified, post_modified_gmt, post_content_filtered, post_parent, guid, menu_order, post_type, post_mime_type, comment_count) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")) {
+							$stmt->bind_param("isssssssssssssssisissi", $author = 1, $now, $now, $content = '', $title, $excerpt = '', $status = 'publish', $comment_status = 'closed', $ping_status = 'closed', $post_password = '', $post_name, $to_ping = '', $pinged = '', $now, $now, $post_content_filtered = '', $parent = 0, $guid = '', $menu_order = 0, $post_type = 'scoreboard', $post_mime_type = '', $comment_count = 0);
+							$stmt->execute();
+							$stmt->close();	      
+						}
+							
+						$lastRecord = $db->insert_id;							
+						
 						$fixtures[] = array(  
 								'date' => $date,  
                    		        'time' => $time,  
