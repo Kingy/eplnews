@@ -48,7 +48,7 @@ if($ch){
 		}	
       
 		$fixtures = array();
-		$nextWeek = strtotime("+6 day");
+		$nextWeek = strtotime("+3 day");
       
 		foreach ($scoresTable as $table) { 
 			$newDom = new DOMDocument;  
@@ -159,8 +159,8 @@ if($ch){
 									'location' => $location,            
 							);
 							
-						}	
 						sleep(1);
+						}							
 					}					
 				}				
 			}
