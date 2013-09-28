@@ -133,7 +133,7 @@ if($ch){
 			}
 			
 			$now = date('Y-m-d H:i:s');
-			$title = $rawTeams[0] . " vs " . $rawTeams[1];
+			$title = $fixture['home'] . " vs " . $fixture['away'];
 			$post_name = strtolower(str_replace("-", " ", $title));
 				
 			if ($stmt = $db->prepare("INSERT INTO wp_posts (post_author, post_date, post_date_gmt, post_content, post_title, post_excerpt, post_status, comment_status, ping_status, post_password, post_name, to_ping, pinged, post_modified, post_modified_gmt, post_content_filtered, post_parent, guid, menu_order, post_type, post_mime_type, comment_count) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")) {
@@ -159,7 +159,7 @@ if($ch){
 				$stmt->close();	      
 			}
 			
-			$matchTime = strtotime($date . " " . $time);
+			$matchTime = strtotime($fixture['date'] . " " . $fixture['time']);
 			$gd_status = date("d/m H:i", $matchTime);
 			
 			if ($stmt = $db->prepare("INSERT INTO wp_postmeta (post_id, meta_key, meta_value) VALUES(?,?,?)")) {
@@ -169,13 +169,13 @@ if($ch){
 			}
 			
 			if ($stmt = $db->prepare("INSERT INTO wp_postmeta (post_id, meta_key, meta_value) VALUES(?,?,?)")) {
-				$stmt->bind_param("iss", $lastRecord, $meta_key = 'gd_away_team', team_name_to_short_name($rawTeams[0]));
+				$stmt->bind_param("iss", $lastRecord, $meta_key = 'gd_away_team', team_name_to_short_name($fixture['home']));
 				$stmt->execute();
 				$stmt->close();	      
 			}
 			
 			if ($stmt = $db->prepare("INSERT INTO wp_postmeta (post_id, meta_key, meta_value) VALUES(?,?,?)")) {
-				$stmt->bind_param("iss", $lastRecord, $meta_key = 'gd_home_team', team_name_to_short_name($rawTeams[1]));
+				$stmt->bind_param("iss", $lastRecord, $meta_key = 'gd_home_team', team_name_to_short_name($fixture['away']));
 				$stmt->execute();
 				$stmt->close();	      
 			}
