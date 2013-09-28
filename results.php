@@ -159,7 +159,7 @@ if($ch) {
 			}
 			
 			if ($stmt = $db->prepare("INSERT INTO wp_term_relationships (object_id, term_taxonomy_id, term_order) VALUES(?,?,?)")) {
-				$stmt->bind_param("iii", $lastRecord, $term_id = 3, $order = 0);
+				$stmt->bind_param("iii", $lastRecord, $term_id = 2, $order = 0);
 				$stmt->execute();
 				$stmt->close();	      
 			}
