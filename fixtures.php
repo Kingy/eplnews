@@ -91,7 +91,61 @@ if($ch){
 							$stmt->close();	      
 						}
 							
-						$lastRecord = $db->insert_id;							
+						$lastRecord = $db->insert_id;		
+						
+						$timestamp = strtotime("now");
+						$edit_lock = $timestamp . ":1";
+						$edit_last = "1";
+						
+						if ($stmt = $db->prepare("INSERT INTO wp_postmeta (post_id, meta_key, meta_value) VALUES(?,?,?)")) {
+							$stmt->bind_param("iss", $lastRecord, $meta_key = '_edit_lock', $edit_lock);
+							$stmt->execute();
+							$stmt->close();	      
+						}
+						if ($stmt = $db->prepare("INSERT INTO wp_postmeta (post_id, meta_key, meta_value) VALUES(?,?,?)")) {
+							$stmt->bind_param("iss", $lastRecord, $meta_key = '_edit_last', $edit_last);
+							$stmt->execute();
+							$stmt->close();	      
+						}
+						
+						$matchTime = strtotime($date . " " . $time);
+						$gd_status = date("d/m H:i", $matchTime);
+						
+						if ($stmt = $db->prepare("INSERT INTO wp_postmeta (post_id, meta_key, meta_value) VALUES(?,?,?)")) {
+							$stmt->bind_param("iss", $lastRecord, $meta_key = 'gd_status', $gd_status);
+							$stmt->execute();
+							$stmt->close();	      
+						}
+						
+						if ($stmt = $db->prepare("INSERT INTO wp_postmeta (post_id, meta_key, meta_value) VALUES(?,?,?)")) {
+							$stmt->bind_param("iss", $lastRecord, $meta_key = 'gd_away_team', $rawTeams[0]);
+							$stmt->execute();
+							$stmt->close();	      
+						}
+						
+						if ($stmt = $db->prepare("INSERT INTO wp_postmeta (post_id, meta_key, meta_value) VALUES(?,?,?)")) {
+							$stmt->bind_param("iss", $lastRecord, $meta_key = 'gd_home_team', $rawTeams[1]);
+							$stmt->execute();
+							$stmt->close();	      
+						}
+						
+						if ($stmt = $db->prepare("INSERT INTO wp_postmeta (post_id, meta_key, meta_value) VALUES(?,?,?)")) {
+							$stmt->bind_param("iss", $lastRecord, $meta_key = 'gd_away_team_score', $score = '0');
+							$stmt->execute();
+							$stmt->close();	      
+						}
+						
+						if ($stmt = $db->prepare("INSERT INTO wp_postmeta (post_id, meta_key, meta_value) VALUES(?,?,?)")) {
+							$stmt->bind_param("iss", $lastRecord, $meta_key = 'gd_home_team_score', $score = '0');
+							$stmt->execute();
+							$stmt->close();	      
+						}
+						
+						if ($stmt = $db->prepare("INSERT INTO wp_term_relationships (object_id, term_taxonomy_id, term_order) VALUES(?,?,?)")) {
+							$stmt->bind_param("iii", $lastRecord, $term_id = 3, $order = 0);
+							$stmt->execute();
+							$stmt->close();	      
+						}
 						
 						$fixtures[] = array(  
 								'date' => $date,  
@@ -103,6 +157,7 @@ if($ch){
                         
                     }			          	      	 
 				}
+				sleep(1);
 			}
 		}
 	
