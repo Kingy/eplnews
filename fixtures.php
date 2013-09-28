@@ -95,7 +95,6 @@ if($ch){
 	
 		foreach ($fixtures as $fixture)
 		{
-			
 							
 		}    
 	}
